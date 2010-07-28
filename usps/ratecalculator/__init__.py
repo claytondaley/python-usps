@@ -1,0 +1,3 @@
+"""
+USPS rate calculator module
+"""

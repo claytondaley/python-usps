@@ -1,5 +1,4 @@
 import unittest
-
 from usps.addressinformation import *
 
 USERID = None
