@@ -1,5 +1,6 @@
 import unittest
-from usps.addressinformation import *
+from usps.api import USPS_CONNECTION_TEST
+from usps.api.addressinformation import AddressValidate, ZipCodeLookup, CityStateLookup
 
 USERID = None
 

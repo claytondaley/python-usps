@@ -1,7 +1,7 @@
 '''
 See http://www.usps.com/webtools/htm/Address-Information.htm for complete documentation of the API
 '''
-from usps.base import USPSService
+from usps.api.base import USPSService
 
 class AddressValidate(USPSService):
     SERVICE_NAME = 'AddressValidate'

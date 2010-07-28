@@ -1,7 +1,7 @@
 """
+Rate Calculator classes
 """
-
-from usps.base import USPSService
+from usps.api.base import USPSService
 
 class DomesticRateCalculator(USPSService):
     """
