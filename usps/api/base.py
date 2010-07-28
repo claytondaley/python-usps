@@ -8,10 +8,10 @@ except ImportError:
     from elementtree import ElementTree as ET
 
 class USPSService(object):
-    SERVICE_NAME = None
-    API = None
-    CHILD_XML_NAME = None
-    PARAMETERS = None
+    SERVICE_NAME = ''
+    API = ''
+    CHILD_XML_NAME = ''
+    PARAMETERS = []
     
     def __init__(self, url):
         self.url = url
@@ -39,8 +39,10 @@ class USPSService(object):
         root.attrib['USERID'] = userid
         index = 0
         for data_dict in data:
-            data_xml = dicttoxml(data_dict, root, self.CHILD_XML_NAME, self.PARAMETERS)
+            data_xml = dicttoxml(data_dict, self.CHILD_XML_NAME, self.PARAMETERS)
             data_xml.attrib['ID'] = str(index)
+            
+            root.append(data_xml)
             index += 1
         return root
     

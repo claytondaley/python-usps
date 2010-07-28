@@ -1,2 +1,4 @@
 syntax: glob
 *.pyc
+*.orig
+python_usps.egg-info

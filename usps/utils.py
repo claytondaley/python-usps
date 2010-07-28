@@ -12,13 +12,14 @@ def utf8urlencode(data):
     utf8 URL encode the given dictionary's data
     
     @param data: a dictionary of data to be encoded
+    @return: the dictionary data with values URL encoded
     """
     ret = dict()
     for key, value in data.iteritems():
         ret[key] = value.encode('utf8')
     return urllib.urlencode(ret)
 
-def dicttoxml(dictionary, tagname, parent=None, attributes=None):
+def dicttoxml(dictionary, tagname, attributes=None):
     """
     Transform a dictionary to xml
     
@@ -26,10 +27,7 @@ def dicttoxml(dictionary, tagname, parent=None, attributes=None):
     @param parent:  a parent node
     @return: XML serialization of the given dictionary
     """
-    if parent:
-        element = ET.SubElement(parent, tagname)
-    else: 
-        element = ET.Element(tagname)
+    element = ET.Element(tagname)
     
     if attributes: #USPS likes things in a certain order!
         for key in attributes:
@@ -53,8 +51,10 @@ def xmltodict(element):
     Transform an xml fragment into a python dictionary
     
     @param element: an XML fragment
+    @return: a dictionary representation of an XML fragment
     """
     ret = dict()
     for item in element.getchildren():
         ret[item.tag] = item.text
     return ret
+
