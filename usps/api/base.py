@@ -16,12 +16,16 @@ class USPSService(object):
     Base USPS Service Wrapper implementation
     """
     SERVICE_NAME = ''
-    API = ''
     CHILD_XML_NAME = ''
     PARAMETERS = []
     
-    def __init__(self, url):
+    @property
+    def API(self):
+        return self.SERVICE_NAME
+        
+    def __init__(self, url, user_id):
         self.url = url
+        self.user_id = user_id
 
     def submit_xml(self, xml):
         """
@@ -51,15 +55,15 @@ class USPSService(object):
             items.append(xmltodict(item))
         return items
     
-    def make_xml(self, userid, data):
+    def make_xml(self, data, user_id):
         """
         Transform the data provided to an XML fragment
         @param userid: the USPS API user id
         @param data: the data to serialize and send to USPS
         @return: an XML fragment representing data
-        """
+        """       
         root = ET.Element(self.SERVICE_NAME+'Request')
-        root.attrib['USERID'] = userid
+        root.attrib['USERID'] = user_id
         index = 0
         for data_dict in data:
             data_xml = dicttoxml(data_dict, self.CHILD_XML_NAME, self.PARAMETERS)
@@ -69,14 +73,17 @@ class USPSService(object):
             index += 1
         return root
     
-    def execute(self, userid, data):
+    def execute(self,data, user_id=None):
         """
         Create XML from data dictionary, submit it to 
         the USPS API and parse the response
         
-        @param userid: a USPS user id
+        @param user_id: a USPS user id
         @param data: the data to serialize and submit
         @return: the response from USPS as a dictionary
         """
-        xml = self.make_xml(userid, data)
+        if user_id is None:
+            user_id = self.user_id
+            
+        xml = self.make_xml(data, user_id)
         return self.parse_xml(self.submit_xml(xml))

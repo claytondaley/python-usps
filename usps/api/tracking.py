@@ -16,9 +16,10 @@ class TrackConfirm(USPSService):
     CHILD_XML_NAME = 'TrackID'
     API = 'TrackV2'
     
-    def make_xml(self, userid, data):
+    def make_xml(self, data, user_id):
+          
         root = ET.Element(self.SERVICE_NAME+'Request')
-        root.attrib['USERID'] = userid
+        root.attrib['USERID'] = user_id
         
         for data_dict in data:
             track_id = data_dict.get('ID', False)

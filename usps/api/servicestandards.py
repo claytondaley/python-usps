@@ -11,13 +11,16 @@ except ImportError:
 
 class ServiceStandards(USPSService):
     SERVICE_NAME = ''
-    API = SERVICE_NAME
     PARAMETERS = [
                   'OriginZip',
                   'DestinationZip'
                   ]
     
-    def make_xml(self, userid, data):
+    @property
+    def API(self):
+        return self.SERVICE_NAME
+    
+    def make_xml(self, data, user_id):
         """
         Transform the data provided to an XML fragment
         @param userid: the USPS API user id
@@ -26,7 +29,7 @@ class ServiceStandards(USPSService):
         """
         for data_dict in data:
             data_xml = dicttoxml(data_dict, self.SERVICE_NAME+'Request', self.PARAMETERS)
-            data_xml.attrib['USERID'] = userid
+            data_xml.attrib['USERID'] = user_id
         return data_xml
     
     def parse_xml(self, xml):
@@ -43,7 +46,6 @@ class PriorityMailServiceStandards(ServiceStandards):
     Provides shipping time estimates for Priority mail shipping methods
     """
     SERVICE_NAME = 'PriorityMail'
-    API = SERVICE_NAME
 
 
 class PackageServicesServiceStandards(ServiceStandards):
@@ -51,7 +53,6 @@ class PackageServicesServiceStandards(ServiceStandards):
     Provides shipping time estimates for Package Services (Parcel Post, Bound Printed Matter, Library Mail, and Media Mail)
     """
     SERVICE_NAME = 'StandardB'
-    API = SERVICE_NAME
     
     
 class ExpressMailServiceCommitment(ServiceStandards):
@@ -59,7 +60,6 @@ class ExpressMailServiceCommitment(ServiceStandards):
     Provides drop off locations and commitments for shipment on a given date
     """
     SERVICE_NAME = 'ExpressMailCommitment'
-    API = SERVICE_NAME
     PARAMETERS = [
                   'OriginZIP',
                   'DestinationZIP',

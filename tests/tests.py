@@ -18,8 +18,8 @@ class TestRateCalculatorAPI(unittest.TestCase):
         yet.  E-mail is out to USPS customer service to turn on production access
     """
     def test_domestic_rate(self):
-        """ connector = DomesticRateCalculator(USPS_CONNECTION)
-        response = connector.execute(USERID, [{'Service': 'FIRST_CLASS',
+        """ connector = DomesticRateCalculator(USPS_CONNECTION, USERID)
+        response = connector.execute([{'Service': 'FIRST_CLASS',
                                                'FirstClassMailType': 'LETTER',
                                                'ZipOrigination': '44106',
                                                'ZipDestination': '20770',
@@ -59,8 +59,8 @@ class TestRateCalculatorAPI(unittest.TestCase):
         
     def test_international_rate(self):
         """
-        connector = InternationalRateCalculator(USPS_CONNECTION)
-        response = connector.execute(USERID, [{
+        connector = InternationalRateCalculator(USPS_CONNECTION, USERID)
+        response = connector.execute([{
                                                'Pounds': '3',
                                                'Ounces': '3',
                                                'Machinable': 'false',
@@ -89,51 +89,49 @@ class TestServiceStandardsAPI(unittest.TestCase):
     Tests for service standards API wrappers
     """
     def test_priority_service_standards(self):
-        connector = PriorityMailServiceStandards(USPS_CONNECTION_TEST)
-        response = connector.execute(USERID, [{
-                                                'OriginZip': '4',
-                                                'DestinationZip': '4'
-                                                }])[0]
+        connector = PriorityMailServiceStandards(USPS_CONNECTION_TEST, USERID)
+        response = connector.execute([{'OriginZip': '4',
+                                       'DestinationZip': '4'
+                                    }])[0]
+
+
         self.assertEqual(response['OriginZip'], '4')
         self.assertEqual(response['DestinationZip'], '4')
         self.assertEqual(response['Days'], '1')
         
-        response = connector.execute(USERID, [{
-                                                'OriginZip': '4',
-                                                'DestinationZip': '5'
-                                                }])[0]
+        response = connector.execute([{'OriginZip': '4',
+                                       'DestinationZip': '5'
+                                    }])[0]
                                                 
         self.assertEqual(response['OriginZip'], '4')
         self.assertEqual(response['DestinationZip'], '5')
         self.assertEqual(response['Days'], '2')
         
     def test_package_service_standards(self):
-        connector = PackageServicesServiceStandards(USPS_CONNECTION_TEST)
-        response = connector.execute(USERID, [{
-                                                'OriginZip': '4',
-                                                'DestinationZip': '4'
-                                                }])[0]
+        connector = PackageServicesServiceStandards(USPS_CONNECTION_TEST, USERID)
+        response = connector.execute([{'OriginZip': '4',
+                                       'DestinationZip': '4'
+                                    }])[0]
                                                 
         self.assertEqual(response['OriginZip'], '4')
         self.assertEqual(response['DestinationZip'], '4')
         self.assertEqual(response['Days'], '2')
         
-        response = connector.execute(USERID, [{
-                                                'OriginZip': '4',
-                                                'DestinationZip': '600'
-                                                }])[0]
+        response = connector.execute([{'OriginZip': '4',
+                                       'DestinationZip': '600'
+                                    }])[0]
                                                 
         self.assertEqual(response['OriginZip'], '4')
         self.assertEqual(response['DestinationZip'], '600')
         self.assertEqual(response['Days'], '3')
         
     def test_express_service_commitment(self):
-        connector = ExpressMailServiceCommitment(USPS_CONNECTION_TEST)
-        response = connector.execute(USERID, [{
-                                                'OriginZIP': '20770',
-                                                'DestinationZIP': '11210',
-                                                'Date': '05-Aug-2004'
-                                                }])[0]
+        connector = ExpressMailServiceCommitment(USPS_CONNECTION_TEST, USERID)
+        response = connector.execute([{
+                                        'OriginZIP': '20770',
+                                        'DestinationZIP': '11210',
+                                        'Date': '05-Aug-2004'
+                                    }])[0]
         
         self.assertEqual(response, {
                                     'DestinationCity': 'BROOKLYN', 
@@ -155,11 +153,10 @@ class TestServiceStandardsAPI(unittest.TestCase):
                                     'Date': '05-Aug-2004', 
                                     'OriginCity': 'GREENBELT'})
         
-        response = connector.execute(USERID, [{
-                                                'OriginZIP': '207',
-                                                'DestinationZIP': '11210',
-                                                'Date': ''
-                                                }])[0]
+        response = connector.execute([{'OriginZIP': '207',
+                                       'DestinationZIP': '11210',
+                                       'Date': ''
+                                    }])[0]
         
         self.assertEqual(response, {
                                     'Commitment': {'CommitmentName': 'Next Day',
@@ -191,15 +188,15 @@ class TestTrackConfirmAPI(unittest.TestCase):
         """
         Test Track/Confirm API connector
         """
-        connector = TrackConfirm(USPS_CONNECTION_TEST)
-        response = connector.execute(USERID, [{'ID':'EJ958083578US'},])[0]
+        connector = TrackConfirm(USPS_CONNECTION_TEST, USERID)
+        response = connector.execute([{'ID':'EJ958083578US'},])[0]
         
         self.assertEqual(response['TrackSummary'], 'Your item was delivered at 8:10 am on June 1 in Wilmington DE 19801.')
         self.assertEqual(response['TrackDetail'][0], 'May 30 11:07 am NOTICE LEFT WILMINGTON DE 19801.')
         self.assertEqual(response['TrackDetail'][1], 'May 30 10:08 am ARRIVAL AT UNIT WILMINGTON DE 19850.')
         self.assertEqual(response['TrackDetail'][2], 'May 29 9:55 am ACCEPT OR PICKUP EDGEWATER NJ 07020.')
 
-        response = connector.execute(USERID, [{'ID': 'EJ958088694US'}])[0]
+        response = connector.execute([{'ID': 'EJ958088694US'}])[0]
         self.assertEqual(response['TrackSummary'], 'Your item was delivered at 1:39 pm on June 1 in WOBURN MA 01815.')
         self.assertEqual(response['TrackDetail'][0], 'May 30 7:44 am NOTICE LEFT WOBURN MA 01815.')
         self.assertEqual(response['TrackDetail'][1], 'May 30 7:36 am ARRIVAL AT UNIT NORTH READING MA 01889.')
@@ -211,20 +208,22 @@ class TestAddressInformationAPI(unittest.TestCase):
     Tests for address lookup and validation services
     """
     def test_address_validate(self):
-        connector = AddressValidate(USPS_CONNECTION_TEST)
-        response = connector.execute(USERID, [{'Address2':'6406 Ivy Lane',
-                                               'City':'Greenbelt',
-                                               'State':'MD'}])[0]
+        connector = AddressValidate(USPS_CONNECTION_TEST, USERID)
+        response = connector.execute([{'Address2':'6406 Ivy Lane',
+                                       'City':'Greenbelt',
+                                       'State':'MD'}])[0]
+                                       
         self.assertEqual(response['Address2'], '6406 IVY LN')
         self.assertEqual(response['City'], 'GREENBELT')
         self.assertEqual(response['State'], 'MD')
         self.assertEqual(response['Zip5'], '20770')
         self.assertEqual(response['Zip4'], '1440')
         
-        response = connector.execute(USERID, [{'Address2':'8 Wildwood Drive',
-                                               'City':'Old Lyme',
-                                               'State':'CT',
-                                               'Zip5':'06371',}])[0]
+        response = connector.execute([{'Address2':'8 Wildwood Drive',
+                                       'City':'Old Lyme',
+                                       'State':'CT',
+                                       'Zip5':'06371',}])[0]
+                                       
         self.assertEqual(response['Address2'], '8 WILDWOOD DR')
         self.assertEqual(response['City'], 'OLD LYME')
         self.assertEqual(response['State'], 'CT')
@@ -232,20 +231,22 @@ class TestAddressInformationAPI(unittest.TestCase):
         self.assertEqual(response['Zip4'], '1844')
     
     def test_zip_code_lookup(self):
-        connector = ZipCodeLookup(USPS_CONNECTION_TEST)
-        response = connector.execute(USERID, [{'Address2':'6406 Ivy Lane',
-                                               'City':'Greenbelt',
-                                               'State':'MD'}])[0]
+        connector = ZipCodeLookup(USPS_CONNECTION_TEST, USERID)
+        response = connector.execute([{'Address2':'6406 Ivy Lane',
+                                       'City':'Greenbelt',
+                                       'State':'MD'}])[0]
+                                       
         self.assertEqual(response['Address2'], '6406 IVY LN')
         self.assertEqual(response['City'], 'GREENBELT')
         self.assertEqual(response['State'], 'MD')
         self.assertEqual(response['Zip5'], '20770')
         self.assertEqual(response['Zip4'], '1440')
         
-        response = connector.execute(USERID, [{'Address2':'8 Wildwood Drive',
-                                               'City':'Old Lyme',
-                                               'State':'CT',
-                                               'Zip5':'06371',}])[0]
+        response = connector.execute([{'Address2':'8 Wildwood Drive',
+                                       'City':'Old Lyme',
+                                       'State':'CT',
+                                       'Zip5':'06371',}])[0]
+                                       
         self.assertEqual(response['Address2'], '8 WILDWOOD DR')
         self.assertEqual(response['City'], 'OLD LYME')
         self.assertEqual(response['State'], 'CT')
@@ -253,13 +254,14 @@ class TestAddressInformationAPI(unittest.TestCase):
         self.assertEqual(response['Zip4'], '1844')
     
     def test_city_state_lookup(self):
-        connector = CityStateLookup(USPS_CONNECTION_TEST)
-        response = connector.execute(USERID, [{'Zip5':'90210'}])[0]
+        connector = CityStateLookup(USPS_CONNECTION_TEST, USERID)
+        response = connector.execute([{'Zip5':'90210'}])[0]
+        
         self.assertEqual(response['City'], 'BEVERLY HILLS')
         self.assertEqual(response['State'], 'CA')
         self.assertEqual(response['Zip5'], '90210')
         
-        response = connector.execute(USERID, [{'Zip5':'20770',}])[0]
+        response = connector.execute([{'Zip5':'20770',}])[0]
         self.assertEqual(response['City'], 'GREENBELT')
         self.assertEqual(response['State'], 'MD')
         self.assertEqual(response['Zip5'], '20770')

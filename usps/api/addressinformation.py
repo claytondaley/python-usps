@@ -6,7 +6,6 @@ from usps.api.base import USPSService
 class AddressValidate(USPSService):
     SERVICE_NAME = 'AddressValidate'
     CHILD_XML_NAME = 'Address'
-    API = 'Verify'
     PARAMETERS = ['FirmName',
                   'Address1',
                   'Address2',
@@ -15,19 +14,27 @@ class AddressValidate(USPSService):
                   'Zip5',
                   'Zip4',]
     
+    @property
+    def API(self):
+        return 'Verify'
+    
 class ZipCodeLookup(USPSService):
     SERVICE_NAME = 'ZipCodeLookup'
     CHILD_XML_NAME = 'Address'
-    API = 'ZipCodeLookup'
     PARAMETERS = ['FirmName',
                   'Address1',
                   'Address2',
                   'City',
-                  'State',]
+                  'State',]  
+    @property
+    def API(self):
+        return 'ZipCodeLookup'
 
 class CityStateLookup(USPSService):
     SERVICE_NAME = 'CityStateLookup'
     CHILD_XML_NAME = 'ZipCode'
-    API = 'CityStateLookup'
     PARAMETERS = ['Zip5',]
 
+    @property
+    def API(self):
+        return 'CityStateLookup'
