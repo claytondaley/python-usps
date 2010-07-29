@@ -16,9 +16,6 @@ class ServiceStandards(USPSService):
                   'DestinationZip'
                   ]
     
-    @property
-    def API(self):
-        return self.SERVICE_NAME
     
     def make_xml(self, data, user_id):
         """
