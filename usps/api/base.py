@@ -42,7 +42,7 @@ class USPSService(object):
     
     def parse_xml(self, xml):
         """
-        Parse the response from USPS into a dictionar
+        Parse the response from USPS into a dictionary
         @param xml: the xml to parse
         @return: a dictionary representing the XML response from USPS
         """

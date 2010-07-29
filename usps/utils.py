@@ -54,7 +54,15 @@ def xmltodict(element):
     @return: a dictionary representation of an XML fragment
     """
     ret = dict()
-    for item in element.getchildren():
-        ret[item.tag] = item.text
+    for item in element:
+        if len(item) > 0:
+            ret[item.tag] = xmltodict(item)
+        elif item.tag in ret and type(ret[item.tag]).__name__ != 'list':
+            val = ret.get(item.tag, None)
+            ret[item.tag] = [val,item.text,]             
+        elif item.tag in ret and type(ret[item.tag]).__name__ == 'list':
+            ret[item.tag].append(item.text)
+        else:
+            ret[item.tag] = item.text
     return ret
 

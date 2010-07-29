@@ -21,11 +21,12 @@ class TrackConfirm(USPSService):
         root.attrib['USERID'] = userid
         
         for data_dict in data:
-            track_id = data.get('ID', False)
+            track_id = data_dict.get('ID', False)
             if track_id:
-                data_xml = ET.element('TrackID')
+                data_xml = ET.Element('TrackID')
                 data_xml.attrib['ID'] = str(track_id)
                 root.append(data_xml) 
                  
         return root
+    
     
