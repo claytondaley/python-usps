@@ -9,6 +9,7 @@ class DomesticRateCalculator(USPSService):
     """
     SERVICE_NAME = 'RateV3'
     CHILD_XML_NAME = 'Package'
+
     PARAMETERS = ['Service',
                   'FirstClassMailType',
                   'ZipOrigination',
@@ -30,8 +31,6 @@ class DomesticRateCalculator(USPSService):
 class InternationalRateCalculator(USPSService):
     """
     Calculator for international shipping rates
-    
-    @todo - deal with nested GXG data (Length,Width,Height,POBoxFlag,GiftFlag)
     """
     SERVICE_NAME = 'IntlRate'
     CHILD_XML_NAME = 'Package'
@@ -41,6 +40,11 @@ class InternationalRateCalculator(USPSService):
                   'Machinable',
                   'MailType',
                   'GXG',
+                  'Length',
+                  'Width',
+                  'Height',
+                  'POBoxFlag',
+                  'GiftFlag',
                   'ValueOfContents',
                   'Country',
                   ]

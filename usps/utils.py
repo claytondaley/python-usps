@@ -31,11 +31,11 @@ def dicttoxml(dictionary, tagname, attributes=None):
     
     if attributes: #USPS likes things in a certain order!
         for key in attributes:
-            value = dictionary.get(key, '')
+            value = dictionary.get(key, False)
             if type(value).__name__ == 'dict':
-                elem = dicttoxml(value, key)
+                elem = dicttoxml(value, key, attributes)
                 element.append(elem)
-            else:
+            elif value != False:
                 ET.SubElement(element, key).text = value
     else:
         for key, value in dictionary.iteritems():
@@ -56,13 +56,16 @@ def xmltodict(element):
     ret = dict()
     for item in element:
         if len(item) > 0:
-            ret[item.tag] = xmltodict(item)
-        elif item.tag in ret and type(ret[item.tag]).__name__ != 'list':
-            val = ret.get(item.tag, None)
-            ret[item.tag] = [val,item.text,]             
-        elif item.tag in ret and type(ret[item.tag]).__name__ == 'list':
-            ret[item.tag].append(item.text)
+            value = xmltodict(item)
         else:
-            ret[item.tag] = item.text
+            value = item.text 
+            
+        if item.tag in ret and type(ret[item.tag]).__name__ != 'list':
+            old_value = ret.get(item.tag, None)
+            ret[item.tag] = [old_value,value,]             
+        elif item.tag in ret and type(ret[item.tag]).__name__ == 'list':
+            ret[item.tag].append(value)
+        else:
+            ret[item.tag] = value
     return ret
 

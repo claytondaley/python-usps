@@ -1,6 +1,6 @@
 """
+Tests for USPS API wrappers
 """
-from pprint import PrettyPrinter
 import unittest
 from usps.api import USPS_CONNECTION_TEST, USPS_CONNECTION
 from usps.api.addressinformation import AddressValidate, ZipCodeLookup, CityStateLookup
@@ -13,76 +13,96 @@ USERID = None
 class TestRateCalculatorAPI(unittest.TestCase):
     """
     Tests for Rate Calculator API wrappers
-    
-    @todo - get these tests fixed -- the test server doesn't respond to rate calculator V3 requests
-        yet.  E-mail is out to USPS customer service to turn on production access
     """
     def test_domestic_rate(self):
-        """ connector = DomesticRateCalculator(USPS_CONNECTION, USERID)
-        response = connector.execute([{'Service': 'FIRST_CLASS',
-                                               'FirstClassMailType': 'LETTER',
-                                               'ZipOrigination': '44106',
-                                               'ZipDestination': '20770',
-                                               'Pounds': '0',
-                                               'Ounces': '3.5',
-                                               'Size': 'REGULAR',
-                                               'Machinable': 'true'
-                                               },
-                                               {
-                                                'Service': 'PRIORITY',
-                                                'ZipOrigination': '44106',
-                                                'ZipDestination': '20770',
-                                                'Pounds': '1',
-                                                'Ounces': '8',
-                                                'Container': 'NONRECTANGULAR',
-                                                'Size': 'LARGE',
-                                                'Width': '15',
-                                                'Length': '30',
-                                                'Height': '15',
-                                                'Girth': '55'
-                                                },
-                                                {'Service': 'ALL',
-                                                 'FirstClassMailType': 'LETTER',
-                                                 'ZipOrigination': '90210',
-                                                 'ZipDestination': '92298',
-                                                 'Pounds': '8',
-                                                 'Ounces': '32',
-                                                 'Container': None,
-                                                 'Size': 'REGULAR',
-                                                 'Machinable': 'true'}
-                                                ])
         """
-        pass
-        
+        Ensure that Domestic Rate Calculator returns quotes in the expected format
+        """
+        connector = DomesticRateCalculator(USPS_CONNECTION, USERID)
+        response = connector.execute([{'Service': 'First Class',
+                                       'FirstClassMailType': 'LETTER',
+                                       'ZipOrigination': '44106',
+                                       'ZipDestination': '97217',
+                                       'Pounds': '0',
+                                       'Ounces': '3.5',
+                                       'Size': 'REGULAR',
+                                       'Machinable': 'true'
+                                       }, 
+                                       {
+                                        'Service': 'Priority',
+                                        'ZipOrigination': '44106',
+                                        'ZipDestination': '97217',
+                                        'Pounds': '1',
+                                        'Ounces': '8',
+                                        'Container': 'NONRECTANGULAR',
+                                        'Size': 'LARGE',
+                                        'Width': '15',
+                                        'Length': '30',
+                                        'Height': '15',
+                                        'Girth': '55'
+                                        },
+                                        {'Service': 'ALL',
+                                         'FirstClassMailType': 'LETTER',
+                                         'ZipOrigination': '90210',
+                                         'ZipDestination': '97217',
+                                         'Pounds': '8',
+                                         'Ounces': '32',
+                                         'Container': None,
+                                         'Size': 'REGULAR',
+                                         'Machinable': 'true'
+                                        },
+                                        ])
+       
+       
+        for rate in [response[0], response[1]]:
+            self.assertTrue('Postage' in rate)
+            self.assertTrue('Rate' in rate['Postage'])
+            
+        self.assertTrue('Postage' in response[2])
+        for postage in response[2]['Postage']:
+            self.assertTrue('Rate' in postage)
+            self.assertTrue('MailService' in postage)
         
         
         
     def test_international_rate(self):
         """
-        connector = InternationalRateCalculator(USPS_CONNECTION, USERID)
-        response = connector.execute([{
-                                               'Pounds': '3',
-                                               'Ounces': '3',
-                                               'Machinable': 'false',
-                                               'MailType': 'Envelope',
-                                               'Country': 'Canada',
-                                               },
-                                               {'Pounds': '4',
-                                                'Ounces': '3',
-                                                'MailType': 'Package',
-                                                'GXG': {
-                                                        'Length': '46',
-                                                        'Width': '14',
-                                                        'Height': '15',
-                                                        'POBoxFlag': 'N',
-                                                        'GiftFlag': 'N'
-                                                        },
-                                                'ValueOfContents': '250',
-                                                'Country': 'Japan'
-                                                }])
+        Ensure that International Rate Calculator returns quotes in the expected format
         """
-        pass
+        connector = InternationalRateCalculator(USPS_CONNECTION, USERID)
+        response = connector.execute([{'Pounds': '3',
+                                       'Ounces': '3',
+                                       'Machinable': 'false',
+                                       'MailType': 'Envelope',
+                                       'Country': 'Canada',
+                                       },
+                                       {'Pounds': '4',
+                                        'Ounces': '3',
+                                        'MailType': 'Package',
+                                        'GXG': {
+                                                'Length': '46',
+                                                'Width': '14',
+                                                'Height': '15',
+                                                'POBoxFlag': 'N',
+                                                'GiftFlag': 'N'
+                                                },
+                                        'ValueOfContents': '250',
+                                        'Country': 'Japan'
+                                        }])
+      
+        for rate in response:
+            self.assertTrue('Prohibitions' in rate)
+            self.assertTrue('Restrictions' in rate)
+            self.assertTrue('Observations' in rate)
+            self.assertTrue('CustomsForms' in rate)
+            self.assertTrue('ExpressMail' in rate)
+            self.assertTrue('AreasServed' in rate)
+            self.assertTrue('Service' in rate)
         
+            for service in rate['Service']:
+                self.assertTrue('Postage' in service)
+                self.assertTrue('SvcCommitments' in service)
+                self.assertTrue('SvcDescription' in service)
     
 class TestServiceStandardsAPI(unittest.TestCase):
     """
@@ -132,51 +152,87 @@ class TestServiceStandardsAPI(unittest.TestCase):
                                         'DestinationZIP': '11210',
                                         'Date': '05-Aug-2004'
                                     }])[0]
+                                    
         
-        self.assertEqual(response, {
-                                    'DestinationCity': 'BROOKLYN', 
-                                    'OriginState': 'MD', 
-                                    'DestinationState': 'NY', 
-                                    'OriginZIP': '20770', 
-                                    'DestinationZIP': '11210', 
-                                    'Commitment': {'CommitmentTime': '12:00 PM', 
-                                                   'CommitmentName': 'Next Day', 
-                                                   'CommitmentSequence': 'A0112', 
-                                                   'Location': {'City': 'BALTIMORE', 
-                                                                'Zip': '21240', 
-                                                                'CutOff': '9:45 PM', 
-                                                                'Facility': 'AIR MAIL FACILITY', 
-                                                                'State': 'MD', 
-                                                                'Street': 'ROUTE 170 BLDG C DOOR 19'}
-                                                   }, 
-                                    'Time': '11:30 AM', 
-                                    'Date': '05-Aug-2004', 
-                                    'OriginCity': 'GREENBELT'})
+        self.assertEqual(response, {'Commitment': [
+                                                   {'CommitmentName': 'Next Day',
+                                                    'CommitmentSequence': 'A0115',
+                                                    'CommitmentTime': '3:00 PM',
+                                                    'Location': [
+                                                                 {'City': 'GREENBELT',
+                                                                  'CutOff': '6:00 PM',
+                                                                  'Facility': 'EXPRESS MAIL COLLECTION BOX',
+                                                                  'State': 'MD',
+                                                                  'Street': '119 CENTER WAY',
+                                                                  'Zip': '20770'},
+                                                                  {'City': 'GREENBELT',
+                                                                   'CutOff': '3:00 PM',
+                                                                   'Facility': 'EXPRESS MAIL COLLECTION BOX',
+                                                                   'State': 'MD',
+                                                                   'Street': '7500 GREENWAY CENTER DRIVE',
+                                                                   'Zip': '20770'}]},
+                                                    {'CommitmentName': 'Next Day',
+                                                     'CommitmentSequence': 'A0112',
+                                                     'CommitmentTime': '12:00 PM',
+                                                     'Location': [
+                                                                  {'City': 'GREENBELT',
+                                                                   'CutOff': '6:00 PM',
+                                                                   'Facility': 'EXPRESS MAIL COLLECTION BOX',
+                                                                   'State': 'MD',
+                                                                   'Street': '119 CENTER WAY',
+                                                                   'Zip': '20770'},
+                                                                   {'City': 'GREENBELT',
+                                                                    'CutOff': '3:00 PM',
+                                                                    'Facility': 'EXPRESS MAIL COLLECTION BOX',
+                                                                    'State': 'MD',
+                                                                    'Street': '7500 GREENWAY CENTER DRIVE',
+                                                                    'Zip': '20770'},
+                                                                    {'City': 'BALTIMORE',
+                                                                     'CutOff': '9:45 PM',
+                                                                     'Facility': 'AIR MAIL FACILITY',
+                                                                     'State': 'MD',
+                                                                     'Street': 'ROUTE 170 BLDG C DOOR 19',
+                                                                     'Zip': '21240'}
+                                                                    ]
+                                                     }],
+                                    'Date': '05-Aug-2004',
+                                    'DestinationCity': 'BROOKLYN',
+                                    'DestinationState': 'NY',
+                                    'DestinationZIP': '11210',
+                                    'OriginCity': 'GREENBELT',
+                                    'OriginState': 'MD',
+                                    'OriginZIP': '20770',
+                                    'Time': '11:30 AM'})
+
         
         response = connector.execute([{'OriginZIP': '207',
                                        'DestinationZIP': '11210',
-                                       'Date': ''
+                                       'Date': '',
                                     }])[0]
         
-        self.assertEqual(response, {
-                                    'Commitment': {'CommitmentName': 'Next Day',
-                                                   'CommitmentSequence': 'A0115',
-                                                   'CommitmentTime': '3:00 PM',
-                                                   'Location': {'City': 'GREENBELT',
-                                                                'CutOff': '3:00 PM',
-                                                                'Facility': 'EXPRESS MAIL COLLECTION BOX',
-                                                                'State': 'MD',
-                                                                'Street': '7500 GREENWAY CENTER DRIVE',
-                                                                'Zip': '20770'}
-                                                   },
-                                                   'Date': '05-Aug-2004',
-                                                   'DestinationCity': 'BROOKLYN',
-                                                   'DestinationState': 'NY',
-                                                   'DestinationZIP': '11210',
-                                                   'OriginCity': 'GREENBELT',
-                                                   'OriginState': 'MD',
-                                                   'OriginZIP': '207',
-                                                   'Time': '11:30 AM'})
+        self.assertEqual(response, {'DestinationCity': 'BROOKLYN', 
+                                    'OriginState': 'MD', 
+                                    'DestinationState': 'NY', 
+                                    'OriginZIP': '207', 
+                                    'DestinationZIP': '11210', 
+                                    'Commitment': {'CommitmentTime': '3:00 PM', 
+                                                   'CommitmentName': 'Next Day', 
+                                                   'CommitmentSequence': 'A0115', 
+                                                   'Location': [{'City': 'GREENBELT', 
+                                                                 'Zip': '20770', 
+                                                                 'CutOff': '6:00 PM', 
+                                                                 'Facility': 'EXPRESS MAIL COLLECTION BOX', 
+                                                                 'State': 'MD', 
+                                                                 'Street': '119 CENTER WAY'}, 
+                                                                 {'City': 'GREENBELT', 
+                                                                  'Zip': '20770', 
+                                                                  'CutOff': '3:00 PM', 
+                                                                  'Facility': 'EXPRESS MAIL COLLECTION BOX', 
+                                                                  'State': 'MD', 
+                                                                  'Street': '7500 GREENWAY CENTER DRIVE'}]}, 
+                                    'Time': '11:30 AM', 
+                                    'Date': '05-Aug-2004', 
+                                    'OriginCity': 'GREENBELT'})
 
 
 
@@ -209,9 +265,13 @@ class TestAddressInformationAPI(unittest.TestCase):
     """
     def test_address_validate(self):
         connector = AddressValidate(USPS_CONNECTION_TEST, USERID)
-        response = connector.execute([{'Address2':'6406 Ivy Lane',
+        response = connector.execute([{'Firmname': '',
+                                       'Address1': '',
+                                       'Address2':'6406 Ivy Lane',
                                        'City':'Greenbelt',
-                                       'State':'MD'}])[0]
+                                       'State':'MD',
+                                       'Zip5': '',
+                                       'Zip4': ''}])[0]
                                        
         self.assertEqual(response['Address2'], '6406 IVY LN')
         self.assertEqual(response['City'], 'GREENBELT')
@@ -219,10 +279,13 @@ class TestAddressInformationAPI(unittest.TestCase):
         self.assertEqual(response['Zip5'], '20770')
         self.assertEqual(response['Zip4'], '1440')
         
-        response = connector.execute([{'Address2':'8 Wildwood Drive',
+        response = connector.execute([{'Firmname': '',
+                                       'Address1': '',
+                                       'Address2':'8 Wildwood Drive',
                                        'City':'Old Lyme',
                                        'State':'CT',
-                                       'Zip5':'06371',}])[0]
+                                       'Zip5':'06371',
+                                       'Zip4': ''}])[0]
                                        
         self.assertEqual(response['Address2'], '8 WILDWOOD DR')
         self.assertEqual(response['City'], 'OLD LYME')
@@ -232,7 +295,9 @@ class TestAddressInformationAPI(unittest.TestCase):
     
     def test_zip_code_lookup(self):
         connector = ZipCodeLookup(USPS_CONNECTION_TEST, USERID)
-        response = connector.execute([{'Address2':'6406 Ivy Lane',
+        response = connector.execute([{'Firmname': '',
+                                       'Address1': '',
+                                       'Address2':'6406 Ivy Lane',
                                        'City':'Greenbelt',
                                        'State':'MD'}])[0]
                                        
@@ -242,7 +307,9 @@ class TestAddressInformationAPI(unittest.TestCase):
         self.assertEqual(response['Zip5'], '20770')
         self.assertEqual(response['Zip4'], '1440')
         
-        response = connector.execute([{'Address2':'8 Wildwood Drive',
+        response = connector.execute([{'Firmname': '',
+                                       'Address1': '',
+                                       'Address2':'8 Wildwood Drive',
                                        'City':'Old Lyme',
                                        'State':'CT',
                                        'Zip5':'06371',}])[0]
