@@ -2,14 +2,14 @@
 
 from setuptools import setup, find_packages
 
-VERSION = '0.0.1'
+VERSION = '0.0.2'
 LONG_DESC = """\
-A python wrapper to the USPS api, currently only supports the address information api
+A python wrapper to the USPS API
 """
 
 setup(name='python-usps',
       version=VERSION,
-      description="A python wrapper to the USPS api, currently only supports the address information api",
+      description="A python wrapper to the USPS API",
       long_description=LONG_DESC,
       classifiers=[
           'Programming Language :: Python',
@@ -26,7 +26,7 @@ setup(name='python-usps',
       maintainer_email = 'zbyte64@gmail.com',
       url='http://github.com/cuker/python-usps',
       license='New BSD License',
-      packages=find_packages(exclude=['ez_setup', 'usps', 'tests']),
+      packages=find_packages(exclude=['ez_setup']),
       zip_safe=False,
       install_requires=[
       ],
