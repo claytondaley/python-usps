@@ -23,6 +23,7 @@ def dicttoxml(dictionary, tagname, attributes=None):
     """
     Transform a dictionary to xml
     
+    @todo: unit tests
     @param dictionary: a dictionary
     @param parent:  a parent node
     @return: XML serialization of the given dictionary
@@ -50,15 +51,23 @@ def xmltodict(element):
     """
     Transform an xml fragment into a python dictionary
     
+    @todo: unit tests
     @param element: an XML fragment
     @return: a dictionary representation of an XML fragment
     """
     ret = dict()
     for item in element:
         if len(item) > 0:
-            value = xmltodict(item)
+            value = xmltodict(item)         
+            if len(item.attrib.items()) > 0:
+                for k, v in item.attrib.items():
+                    value[k] = v
+        elif len(item.attrib.items()) > 0:
+            value = {'text': item.text}
+            for k, v in item.attrib.items():
+                    value[k] = v     
         else:
-            value = item.text 
+            value = item.text
             
         if item.tag in ret and type(ret[item.tag]).__name__ != 'list':
             old_value = ret.get(item.tag, None)
@@ -67,5 +76,6 @@ def xmltodict(element):
             ret[item.tag].append(value)
         else:
             ret[item.tag] = value
+            
     return ret
 

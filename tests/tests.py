@@ -5,7 +5,7 @@ import unittest
 from usps.api import USPS_CONNECTION_TEST, USPS_CONNECTION
 from usps.api.addressinformation import AddressValidate, ZipCodeLookup, CityStateLookup
 from usps.api.ratecalculator import DomesticRateCalculator, InternationalRateCalculator
-from usps.api.servicestandards import PriorityMailServiceStandards, PackageServicesServiceStandards, ExpressMailServiceCommitment
+from usps.api.servicestandards import PriorityMailServiceStandards, PackageServicesServiceStandards, ExpressMailServiceCommitment, get_service_standards
 from usps.api.tracking import TrackConfirm
 
 USERID = None
@@ -52,7 +52,6 @@ class TestRateCalculatorAPI(unittest.TestCase):
                                          'Machinable': 'true'
                                         },
                                         ])
-       
        
         for rate in [response[0], response[1]]:
             self.assertTrue('Postage' in rate)
@@ -233,7 +232,22 @@ class TestServiceStandardsAPI(unittest.TestCase):
                                     'Time': '11:30 AM', 
                                     'Date': '05-Aug-2004', 
                                     'OriginCity': 'GREENBELT'})
-
+        
+    def test_get_service_standards(self):
+        """
+        Test the get_service_standards function
+        """
+        data = {'OriginZip':'207', 'DestinationZip':'11210', 'CLASSID': 27}
+        delivery_time = get_service_standards(data, USPS_CONNECTION_TEST, USERID)
+        self.assertEqual(delivery_time, 'Next Day')
+        
+        data = {'OriginZip':'4', 'DestinationZip':'4', 'CLASSID': 0}
+        delivery_time = get_service_standards(data, USPS_CONNECTION_TEST, USERID)
+        self.assertEqual(delivery_time, '2 Days')
+        
+        data = {'OriginZip':'97222', 'DestinationZip':'90210', 'CLASSID': 99}
+        delivery_time = get_service_standards(data, USPS_CONNECTION_TEST, USERID)
+        self.assertEqual(delivery_time, False)
 
 
 class TestTrackConfirmAPI(unittest.TestCase):
